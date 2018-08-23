@@ -106,12 +106,16 @@ for path_to_image in paths_to_test_images:
     face_encodings_in_image = get_face_encodings(path_to_image)
 
     # Make sure there's exactly one face in the image
-    if len(face_encodings_in_image) != 1:
-        print("Please change image: " + path_to_image + " - it has " + str(len(face_encodings_in_image)) + " faces; it can only have one")
-        exit()
+   # if len(face_encodings_in_image) != 1:
+    #    print("Please change image: " + path_to_image + " - it has " + str(len(face_encodings_in_image)) + " faces; it can only have one")
+     #   exit()
 
-    # Find match for the face encoding found in this test image
-    match = find_match(face_encodings, names, face_encodings_in_image[0])
 
-    # Print the path of test image and the corresponding match
-    print(path_to_image, match)
+     #Looping over each and every face of the image and matching it with the image in the database
+
+    for i in range(len(face_encodings_in_image)):
+        # Find match for the face encoding found in this test image
+        match = find_match(face_encodings, names, face_encodings_in_image[i])
+
+        # Print the path of test image and the corresponding match
+        print(path_to_image, match)
