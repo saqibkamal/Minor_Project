@@ -7,6 +7,7 @@ import os
 # This allows us to detect faces in images
 face_detector = dlib.get_frontal_face_detector()
 
+
 # Get Pose Predictor from dlib
 # This allows us to detect landmark points in faces and understand the pose/angle of the face
 shape_predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
