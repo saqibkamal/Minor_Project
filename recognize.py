@@ -45,6 +45,10 @@ def compare_face_encodings(known_faces, face):
     # Calculate norm for the differences with each known face
     # Return an array with True/Face values based on whether or not a known face matched with the given face
     # A match occurs when the (norm) difference between a known face and the given face is less than or equal to the TOLERANCE value
+
+    matches =np.linalg.norm(known_faces - face,axis=1)
+    #print(matches)
+    return (matches)
     return (np.linalg.norm(known_faces - face, axis=1) <= TOLERANCE)
 
     # This function returns the name of the person whose image matches with the given face (or 'Not Found')
@@ -55,15 +59,18 @@ def find_match(known_faces, names, face):
     # Call compare_face_encodings to get a list of True/False values indicating whether or not there's a match
     matches = compare_face_encodings(known_faces, face)
 
-    # Return the name of the first match
-    count = 0
-    for match in matches:
-        if match:
-            return names[count]
-        count += 1
+    i = np.argmin(matches)
 
-    # Return not found if no match found
-    return 'Not Found'
+    if matches[i]<0.6 :
+        return names[i],1
+    else:
+        return 'Not Found',0
+
+    #print(matches)
+
+
+
+    
 
     # Get path to all the known images
 # Filtering on .jpg extension - so this will only work with JPEG images ending with .jpg
@@ -76,7 +83,7 @@ image_filenames = sorted(image_filenames)
 paths_to_images = ['images/' + x for x in image_filenames]
 
 # List of face encodings we have
-face_encodings = []
+face_encodings = np.load('face_encodings.npy')
 
 # Loop over images to get the encoding one by one
 for path_to_image in paths_to_images:
@@ -89,7 +96,9 @@ for path_to_image in paths_to_images:
         exit()
 
     # Append the face encoding found in that image to the list of face encodings we have
-    face_encodings.append(get_face_encodings(path_to_image)[0])
+    #face_encodings.append(get_face_encodings(path_to_image)[0])
+
+    #print(face_encodings)
 
     # Get path to all the test images
 # Filtering on .jpg extension - so this will only work with JPEG images ending with .jpg

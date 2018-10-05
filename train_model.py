@@ -3,15 +3,11 @@ import scipy.misc
 import numpy as np
 import os
 
-import time
-
 from flask import Flask,jsonify,request
 import string
 import base64
 from PIL import Image
 from io import BytesIO
-
-app = Flask(__name__)
 
 #hello
 # Get Face Detector from dlib
@@ -26,12 +22,6 @@ shape_predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 # This is what gives us the face encodings (numbers that identify the face of a particular person)
 face_recognition_model = dlib.face_recognition_model_v1('dlib_face_recognition_resnet_model_v1.dat')
 
-# This is the tolerance for face comparisons
-# The lower the number - the stricter the comparison
-# To avoid false matches, use lower value
-# To avoid false negatives (i.e. faces of the same person doesn't match), use higher value
-# 0.5-0.6 works well
-TOLERANCE = 0.6
 
 # This function will take an image and return its face encodings using the neural network
 def get_face_encodings(path_to_image):
@@ -50,29 +40,6 @@ def get_face_encodings(path_to_image):
     return [np.array(face_recognition_model.compute_face_descriptor(image, face_pose, 1)) for face_pose in shapes_faces]
 
     # This function takes a list of known faces
-def compare_face_encodings(known_faces, face):
-    # Finds the difference between each known face and the given face (that we are comparing)
-    # Calculate norm for the differences with each known face
-    # Return an array with True/Face values based on whether or not a known face matched with the given face
-    # A match occurs when the (norm) difference between a known face and the given face is less than or equal to the TOLERANCE value
-    return(np.linalg.norm(known_faces - face,axis=1))
-
-    # This function returns the name of the person whose image matches with the given face (or 'Not Found')
-# known_faces is a list of face encodings
-# names is a list of the names of people (in the same order as the face encodings - to match the name with an encoding)
-# face is the face we are looking for
-def find_match(known_faces, names, face):
-    # Call compare_face_encodings to get a list of True/False values indicating whether or not there's a match
-    matches = compare_face_encodings(known_faces, face)
-
-    i = np.argmin(matches)
-
-    if matches[i] < TOLERANCE :
-        return names[i],1
-    else:
-        return 'Not Found',0
-
-
 def train_model():
 
 
@@ -104,67 +71,7 @@ def train_model():
         names = [x[:-4] for x in image_filenames]
 
 
-    return face_encodings,names
-
-@app.route("/predict",methods=['POST'])
-def predict():
-
-    start =time.clock()
-    
-    content = request.get_json()
-    im = Image.open(BytesIO(base64.b64decode(content["image"])))
-    im.save('test/image.jpg')
-
-    print("Image Recieved")
-
-    print("Time to preprocess image",time.clock()-start)
-    start =time.clock()
-
-
-
-    face_encodings = np.load('face_encodings.npy')
-    names = np.load('name.npy')
-
-    #face_encodings,names = train_model()
-
-    print("Time to load train_model",time.clock()-start)
-    start =time.clock()
-
-    
-
-    face_encodings_in_image = get_face_encodings('test/image.jpg')
-    s=""
-    found=0
-
-    if len(face_encodings_in_image)==0:
-        return jsonify("No face in the given image")
-
-
-    for i in range(len(face_encodings_in_image)):
-        # Find match for the face encoding found in this test image
-        match,flag= find_match(face_encodings, names, face_encodings_in_image[i])
-
-        # Print the path of test image and the corresponding match
-        #print(match,flag)
-
-        if(flag==1):
-            found=1
-            s+=match+" "
-
-    print(s)
-
-    print("time to match",time.clock()-start)
-
-    if(found==0):
-        return jsonify("No match found")
-    else:
-        return s
-
-
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0')
- 
-
-
+    np.save('face_encodings',face_encodings)
+    np.save('name',names)
+   
+train_model()
