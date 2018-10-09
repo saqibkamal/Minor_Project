@@ -31,7 +31,7 @@ face_recognition_model = dlib.face_recognition_model_v1('dlib_face_recognition_r
 # To avoid false matches, use lower value
 # To avoid false negatives (i.e. faces of the same person doesn't match), use higher value
 # 0.5-0.6 works well
-TOLERANCE = 0.6
+TOLERANCE = 0.5
 
 # This function will take an image and return its face encodings using the neural network
 def get_face_encodings(path_to_image):
@@ -132,12 +132,12 @@ def predict():
 
     
 
-    face_encodings_in_image = get_face_encodings('test/image.jpg')
+    face_encodings_in_image = get_face_encodings('test/ankit.jpg')
     s=""
     found=0
 
     if len(face_encodings_in_image)==0:
-        return jsonify("No face in the given image")
+        return "No face"
 
 
     for i in range(len(face_encodings_in_image)):
@@ -156,7 +156,7 @@ def predict():
     print("time to match",time.clock()-start)
 
     if(found==0):
-        return jsonify("No match found")
+        return "No match"
     else:
         return s
 
