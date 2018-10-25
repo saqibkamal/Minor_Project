@@ -3,6 +3,8 @@ import scipy.misc
 import numpy as np
 import os
 
+import time
+
 from flask import Flask,jsonify,request
 import string
 import base64
@@ -36,6 +38,7 @@ def get_face_encodings(path_to_image):
     # This allows the neural network to be able to produce similar numbers for faces of the same people, regardless of camera angle and/or face positioning in the image
     shapes_faces = [shape_predictor(image, face) for face in detected_faces]
 
+
     # For every face detected, compute the face encodings
     return [np.array(face_recognition_model.compute_face_descriptor(image, face_pose, 1)) for face_pose in shapes_faces]
 
@@ -58,6 +61,7 @@ def train_model():
 
     # Loop over images to get the encoding one by one
     for path_to_image in paths_to_images:
+
         # Get face encodings from the image
         face_encodings_in_image = get_face_encodings(path_to_image)
 
@@ -67,11 +71,14 @@ def train_model():
             exit()
 
         # Append the face encoding found in that image to the list of face encodings we have
-        face_encodings.append(get_face_encodings(path_to_image)[0])
+        face_encodings.append(face_encodings_in_image[0])
         names = [x[:-4] for x in image_filenames]
 
 
     np.save('face_encodings',face_encodings)
     np.save('name',names)
-   
+
+  
+start =time.clock() 
 train_model()
+print("Time to train_model",time.clock()-start)

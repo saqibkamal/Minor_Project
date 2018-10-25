@@ -132,7 +132,7 @@ def predict():
 
     
 
-    face_encodings_in_image = get_face_encodings('test/ankit.jpg')
+    face_encodings_in_image = get_face_encodings('test/image.jpg')
     s=""
     found=0
 
