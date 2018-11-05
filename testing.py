@@ -1,13 +1,10 @@
+import dlib
+import scipy.misc
 import numpy as np
-import os
 import time
-from flask import Flask,jsonify,request
-import base64
-from PIL import Image
-from io import BytesIO
+import os
 import GetFaceEncodings as GFE
 
-app = Flask(__name__)
 
 # This is the tolerance for face comparisons
 # The lower the number - the stricter the comparison
@@ -15,7 +12,6 @@ app = Flask(__name__)
 # To avoid false negatives (i.e. faces of the same person doesn't match), use higher value
 # 0.5-0.6 works well
 TOLERANCE = 0.5
-
 
 # This function takes a list of known faces
 def compare_face_encodings(known_faces, face):
@@ -42,60 +38,39 @@ def find_match(known_faces, names, face):
     else:
         return 'Not Found',0
 
-
-@app.route("/predict",methods=['POST'])
-def predict():
-
-    start =time.clock()
-    
-    content = request.get_json()
-    im = Image.open(BytesIO(base64.b64decode(content["image"])))
-    im.save('test/image.jpg')
-    
-
-    print("Image Recieved")
-
-    print("Time to preprocess image",time.clock()-start)
-    start =time.clock()
+start = time.clock()
+face_encodings = np.load('face_encodings.npy')
+names = np.load('name.npy')
 
 
+# Get path to all the test images
+# Filtering on .jpg extension - so this will only work with JPEG images ending with .jpg
+test_filenames = filter(lambda x: x.endswith('.jpg'), os.listdir('test/'))
 
-    face_encodings = np.load('face_encodings.npy')
-    names = np.load('name.npy')
+# Get full paths to test images
+paths_to_test_images = ['test/' + x for x in test_filenames]
 
 
-    print("Time to load train_model",time.clock()-start)
-    start =time.clock()
+# Iterate over test images to find match one by one
+eff=0
+total=0
+for path_to_image in paths_to_test_images:
+    # Get face encodings from the test image
+    face_encodings_in_image = GFE.get_face_encodings(path_to_image)
 
-    
 
-    face_encodings_in_image = GFE.get_face_encodings('test/image.jpg')
-    s=""
-    found=0
-
-    if len(face_encodings_in_image)==0:
-        return "No face"
-
+    #Looping over each and every face of the image and matching it with the image in the database
 
     for i in range(len(face_encodings_in_image)):
         # Find match for the face encoding found in this test image
-        match,flag= find_match(face_encodings, names, face_encodings_in_image[i])
+        match,flag = find_match(face_encodings, names, face_encodings_in_image[i])
 
-        if(flag==1):
-            found=1
-            s+=match+" "
+        if match in path_to_image and flag==1:
+            eff=eff+1
+        total=total+1
 
-    print(s)
+        # Print the path of test image and the corresponding match
+        print(path_to_image[5:], match)
 
-    print("time to match",time.clock()-start)
-
-    if(found==0):
-        return "No match"
-    else:
-        return s
-
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0')
- 
-
+print(eff/total)
+print("Time to preprocess image",time.clock()-start)
