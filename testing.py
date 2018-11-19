@@ -45,15 +45,14 @@ names = np.load('name.npy')
 
 # Get path to all the test images
 # Filtering on .jpg extension - so this will only work with JPEG images ending with .jpg
-test_filenames = filter(lambda x: x.endswith('.jpg'), os.listdir('test/'))
+test_filenames = filter(lambda x: x.endswith('.jpg'), os.listdir('test_images/'))
 
 # Get full paths to test images
-paths_to_test_images = ['test/' + x for x in test_filenames]
-
+paths_to_test_images = ['test_images/' + x for x in test_filenames]
 
 # Iterate over test images to find match one by one
 eff=0
-total=0
+total=185
 for path_to_image in paths_to_test_images:
     # Get face encodings from the test image
     face_encodings_in_image = GFE.get_face_encodings(path_to_image)
@@ -65,12 +64,13 @@ for path_to_image in paths_to_test_images:
         # Find match for the face encoding found in this test image
         match,flag = find_match(face_encodings, names, face_encodings_in_image[i])
 
-        if match in path_to_image and flag==1:
+        if match in path_to_image:
             eff=eff+1
-        total=total+1
+        
 
         # Print the path of test image and the corresponding match
         print(path_to_image[5:], match)
+    
 
 print(eff/total)
 print("Time to preprocess image",time.clock()-start)
