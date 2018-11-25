@@ -2,10 +2,11 @@ import ImageEnhance as IE
 import dlib
 import scipy.misc
 import numpy as np
-
 import cv2
 
+#For Haar Cascade Face Recognition
 haar_detector= cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
 # Get Face Detector from dlib
 # This allows us to detect faces in images
 face_detector = dlib.get_frontal_face_detector()
@@ -33,6 +34,7 @@ def get_face_encodings(path_to_image):
 
     # Detect faces using the face detector
     detected_faces_using_SVM =face_detector(image, 1)
+
     #detected_faces_using_CNN = cnn_face_detector(image, 1)
 
     #gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -44,6 +46,7 @@ def get_face_encodings(path_to_image):
     # Get pose/landmarks of those faces
     # Will be used as an input to the function that computes face encodings
     # This allows the neural network to be able to produce similar numbers for faces of the same people, regardless of camera angle and/or face positioning in the image
+    
     shapes_faces = [shape_predictor(image, face) for face in detected_faces_using_SVM]
     #shapes_faces = [shape_predictor(image, dlib.rectangle(face.rect.left(),face.rect.top(),face.rect.right(),face.rect.bottom())) for face in detected_faces_using_CNN]
     #shapes_faces = [shape_predictor(image,dlib.rectangle(x,y,x+w,y+h)) for (x,y,w,h) in detected_faces_using_Haar]
@@ -52,6 +55,3 @@ def get_face_encodings(path_to_image):
     face_encoding= [np.array(face_recognition_model.compute_face_descriptor(image, face_pose, 1)) for face_pose in shapes_faces]
     
     return face_encoding
-
-
-get_face_encodings('test_images/virenderrangasolti.jpg')

@@ -10,18 +10,14 @@ import GetFaceEncodings as GFE
 app = Flask(__name__)
 
 # This is the tolerance for face comparisons
-# The lower the number - the stricter the comparison
-# To avoid false matches, use lower value
-# To avoid false negatives (i.e. faces of the same person doesn't match), use higher value
-# 0.5-0.6 works well
 TOLERANCE = 0.5
 
 
 # This function takes a list of known faces
 def compare_face_encodings(known_faces, face):
+    
     # Finds the difference between each known face and the given face (that we are comparing)
     # Calculate norm for the differences with each known face
-    # A match occurs when the (norm) difference between a known face and the given face is less than or equal to the TOLERANCE value
     return(np.linalg.norm(known_faces - face,axis=1))
 
 # This function returns the name of the person whose image matches with the given face (or 'Not Found')
@@ -29,15 +25,13 @@ def compare_face_encodings(known_faces, face):
 # names is a list of the names of people (in the same order as the face encodings - to match the name with an encoding)
 # face is the face we are looking for
 def find_match(known_faces, names, face):
-    # Call compare_face_encodings to get a list of True/False values indicating whether or not there's a match
+
+    # Call compare_face_encodings to get a list of Euclidian distance values with each known faces
     matches = compare_face_encodings(known_faces, face)
 
     i = np.argmin(matches)
 
-    # for k in range(len(matches)):
-    #     print(names[k]+"  "+str(matches[k]))
-
-    if matches[i] < TOLERANCE :
+    if matches[i] <= TOLERANCE :
         return names[i],1
     else:
         return 'Not Found',0
